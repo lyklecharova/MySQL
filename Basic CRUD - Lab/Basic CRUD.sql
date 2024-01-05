@@ -21,3 +21,25 @@ WHERE job_title = 'Manager';
 
 SELECT salary
 FROM employees;
+
+-- 4 Top Paid Employee
+CREATE VIEW employee_view AS
+	SELECT *
+    FROM employees
+    ORDER BY salary DESC
+    LIMIT 1;
+SELECT *
+FROM employees_view;
+
+-- 5 Select Employees by Multiple Filters
+SELECT 
+    id, first_name, last_name, job_title, department_id, salary
+FROM employees
+WHERE department_id = 4 AND salary >= 1000;
+
+-- 6 Delete from Table
+DELETE FROM employees
+WHERE department_id IN (1,2);
+SELECT *
+FROM employees
+ORDER BY id;
