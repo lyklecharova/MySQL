@@ -28,5 +28,6 @@ FROM
 -- 5 Harry Potter Books
 SELECT title
 FROM books
+/* starts with 'Harry' and ends with 'Potter' */
 WHERE title LIKE '%Harry Potter%'
 ORDER BY id;
