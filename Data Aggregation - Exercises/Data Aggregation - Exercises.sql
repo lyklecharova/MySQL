@@ -98,5 +98,73 @@ GROUP BY `department_id`
 HAVING `department_id` IN (2,5,7)
 ORDER BY `department_id`;
 
+-- 13 Employees Average Salaries
+CREATE TABLE `salary_more_than_30000` AS
+SELECT *
+FROM `employees`
+WHERE
+	`salary` > 30000;
+
+DELETE FROM `salary_more_than_30000`
+WHERE
+	`manager_id` = 42;
+    
+UPDATE `salary_more_than_30000` 
+SET
+	`salary` = `salary` + 5000
+WHERE
+	`department_id` = 1;
+
+SELECT `department_id`, AVG(`salary`) AS 'avg_salary'
+FROM `salary_more_than_30000`
+GROUP BY `department_id`
+ORDER BY `department_id` ASC;
+
+-- 14 Employees Maximum Salaries
+SELECT `department_id`, MAX(`salary`) AS 'max_salary'
+FROM `employees`
+GROUP BY   `department_id`
+HAVING 
+	`max_salary` < 30000
+    OR `max_salary` > 70000
+ORDER BY `department_id` ASC;
+
+-- 15 Employees Count Salaries
+SELECT
+	COUNT(*) AS 'count'
+FROM `employees`
+WHERE
+	`manager_id` IS NULL;
+
+-- 16 3rd Highest Salary*
+SELECT DISTINCT
+    `department_id`,
+    (SELECT DISTINCT
+            `salary`
+        FROM
+            `employees` AS `e1`
+        WHERE
+            `e1`.`department_id` = `employees`.`department_id`
+        ORDER BY `salary` DESC
+        LIMIT 1 OFFSET 2) AS `third_highest_salary`
+FROM
+    `employees`
+HAVING `third_highest_salary` IS NOT NULL
+ORDER BY `department_id`;
+
+-- 17 Salary Challenge**
+SELECT
+	`first_name`,
+    `last_name`,
+    `department_id`
+FROM `employees` AS `emp1`
+WHERE
+	`salary` > (
+			SELECT AVG(`salary`)
+            FROM `employees` AS `emp2`
+            WHERE `emp1`. `department_id` = `emp2`. `department_id`
+    )
+ORDER BY `department_id`, `employee_id`
+LIMIT 10;
 
 
