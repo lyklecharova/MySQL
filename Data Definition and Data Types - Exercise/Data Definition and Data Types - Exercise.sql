@@ -5,11 +5,12 @@ use minions;
 -- 1 Create Tables
 CREATE TABLE minions(
 	id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50)
+    name VARCHAR(50),
+    age INT
 );
 
 CREATE TABLE towns(
-	id INT PRIMARY KEY AUTO_INCREMENT,
+	town_id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50)
 );
 
