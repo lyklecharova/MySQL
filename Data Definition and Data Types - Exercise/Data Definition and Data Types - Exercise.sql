@@ -189,12 +189,7 @@ ALTER TABLE users
 CHANGE COLUMN last_login_time last_login_time TIMESTAMP DEFAULT NOW();
 
 -- 10 Set Unique Field
-ALTER TABLE users
-DROP PRIMARY KEY,
-ADD CONSTRAINT pk_users
-PRIMARY KEY users(id),
-CHANGE COLUMN username
-username VARCHAR(30) UNIQUE;
+ 
 
 -- 11 Movies Database
 CREATE DATABASE movies;
@@ -268,10 +263,10 @@ use car_rental;
 CREATE TABLE categories(
 	id INT PRIMARY KEY AUTO_INCREMENT,
     category VARCHAR(30) NOT NULL,
-    daily_rate DOUBLE,
-    weekly_rate DOUBLE,
-    monthly_rate DOUBLE,
-    weekend_rate DOUBLE
+    daily_rate DOUBLE(100 , 2 ),
+    weekly_rate DOUBLE(100 , 2 ),
+    monthly_rate DOUBLE(100 , 2 ),
+    weekend_rate DOUBLE(100 , 2 )
 );
 
 INSERT INTO categories(category)
@@ -282,7 +277,7 @@ VALUES
 
 CREATE TABLE cars(
 	id INT PRIMARY KEY AUTO_INCREMENT,
-    plate_number VARCHAR(4),
+    plate_number VARCHAR(10),
     make VARCHAR(30),
     model VARCHAR(30),
     car_year INT,
@@ -352,8 +347,7 @@ INSERT INTO rental_orders(kilometrage_start,kilometrage_end,total_kilometrage)
 VALUES
 ('1','10','10'),
 ('2','20','20'),
-('3','30','30');('3','30','30');('3','30','30');
-('3','30','30');('3','30','30');
+('3','30','30');
 
 -- 13 Basic Insert
 CREATE DATABASE soft_uni;
