@@ -36,4 +36,25 @@ WHERE
 ORDER BY `t`.`town_id` , `a`.`address_id`;
     
     
-    
+-- 3 Employees Without Managers
+SELECT 
+    `employee_id`,
+    `first_name`,
+    `last_name`,
+    `department_id`,
+    `salary`
+FROM
+    `employees`
+WHERE
+    `manager_id` IS NULL;
+
+-- 4 Higher Salary
+SELECT 
+    COUNT(*) AS 'count'
+FROM
+    `employees`
+WHERE
+    `salary` > (SELECT 
+            AVG(`salary`)
+        FROM
+            `employees`);
