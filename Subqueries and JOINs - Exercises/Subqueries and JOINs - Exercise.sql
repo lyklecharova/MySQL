@@ -84,4 +84,55 @@ WHERE
     `e`.`hire_date` > 1 / 1 / 1999
         AND `d`.`name` = 'Sales'
         OR `d`.`name` = 'Finance'
-ORDER BY `e`.`hire_date` ASC;
+ORDER BY `e`.`hire_date` ASC;ORDER BY `e`.`hire_date` ASC;
+
+-- 7 Employees with Project
+SELECT 
+    `e`.`employee_id`,
+    `e`.`first_name`,
+    `p`.`name` AS 'project_name'
+FROM
+    `employees` AS `e`
+        JOIN
+    `employees_projects` AS `ep` ON `e`.`employee_id` = `ep`.`employee_id`
+        JOIN
+    `projects` AS `p` ON `ep`.`project_id` = `p`.`project_id`
+WHERE
+    DATE(`p`.`start_date`) > '2002-08-13'
+        AND `p`.`end_date` IS NULL
+ORDER BY `e`.`first_name` ASC , `p`.`name` ASC
+LIMIT 5;
+
+-- 8 Employee 24
+SELECT 
+    `e`.`employee_id`,
+    `e`.`first_name`,
+    IF(YEAR(`start_date`) >= 2005,
+        NULL,
+        `p`.`name`) AS 'project_name'
+FROM
+    `employees` AS `e`
+        JOIN
+    `employees_projects` AS `ep` ON `e`.`employee_id` = `ep`.`employee_id`
+        JOIN
+    `projects` AS `p` ON `ep`.`project_id` = `p`.`project_id`
+WHERE
+    `e`.`employee_id` = 24
+ORDER BY `p`.`name` ASC;
+
+
+-- 9 Employee Manager
+SELECT 
+    `e`.`employee_id`,
+    `e`.`first_name`,
+    `e`.`manager_id`,
+    (
+    SELECT
+		`m`. `first_name`
+        FROM `employees` AS `m`
+        WHERE `m`. `employee_id` = `e`. `manager_id`
+    ) AS  'manager_name'
+FROM `employees` AS `e`
+WHERE `e`. `manager_id` IN (3,7)
+ORDER BY `e`.`first_name`;
+
