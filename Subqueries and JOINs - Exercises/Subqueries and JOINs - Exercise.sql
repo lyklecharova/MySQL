@@ -160,3 +160,53 @@ GROUP BY `department_id`
 ORDER BY `min_average_salary`
 LIMIT 1;
 
+USE `geography`;  
+   
+-- 12 Highest Peaks in Bulgaria
+SELECT 
+    `c`.`country_code`,
+    `m`.`mountain_range`,
+    `p`.`peak_name`,
+    `p`.`elevation`
+FROM
+    `countries` AS `c`
+        JOIN
+    `mountains_countries` AS `mc` ON `c`.`country_code` = `mc`.`country_code`
+        JOIN
+    `mountains` AS `m` ON `m`.`id` = `mc`.`mountain_id`
+        JOIN
+    `peaks` AS `p` ON `p`.`mountain_id` = `m`.`id`
+WHERE
+    `c`.`country_code` = 'BG'
+        AND `p`.`elevation` > 2835
+ORDER BY `p`.`elevation` DESC;
+
+
+-- 13 Count Mountain Ranges
+SELECT 
+    `c`.`country_code`,
+    COUNT(`mc`.`mountain_id`) AS 'mountain_range'
+FROM
+    `countries` AS `c`
+        JOIN
+    `mountains_countries` AS `mc` ON `c`.`country_code` = `mc`.`country_code`
+GROUP BY `c`.`country_code`
+HAVING `c`.`country_code` IN ('US' , 'RU', 'BG')
+ORDER BY `mountain_range` DESC;
+
+-- 14 Countries with Rivers
+SELECT 
+    `c`.`country_name`,
+    IF(`river_id` IS NULL,
+        NULL,
+        `r`.`river_name`) AS 'river_name'
+FROM
+    `countries` AS `c`
+        LEFT JOIN
+    `countries_rivers` AS `cr` ON `c`.`country_code` = `cr`.`country_code`
+        LEFT JOIN
+    `rivers` AS `r` ON `cr`.`river_id` = `r`.`id`
+WHERE
+    `c`.`continent_code` = 'AF'
+ORDER BY `c`.`country_name` ASC
+LIMIT 5;
