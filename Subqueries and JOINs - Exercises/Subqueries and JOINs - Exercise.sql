@@ -84,7 +84,7 @@ WHERE
     `e`.`hire_date` > 1 / 1 / 1999
         AND `d`.`name` = 'Sales'
         OR `d`.`name` = 'Finance'
-ORDER BY `e`.`hire_date` ASC;ORDER BY `e`.`hire_date` ASC;
+ORDER BY `e`.`hire_date` ASC;
 
 -- 7 Employees with Project
 SELECT 
@@ -135,4 +135,28 @@ SELECT
 FROM `employees` AS `e`
 WHERE `e`. `manager_id` IN (3,7)
 ORDER BY `e`.`first_name`;
+
+-- 10 Employee Summary
+SELECT 
+    `e`.`employee_id`,
+    CONCAT(`e`.`first_name`, ' ', `e`.`last_name`) AS 'employee_name',
+    CONCAT(`m`.`first_name`, ' ', `m`.`last_name`) AS 'manager_name',
+    `d`.`name` AS 'department_name'
+FROM
+    `employees` AS `e`
+        JOIN
+    `employees` AS `m` ON `e`.`manager_id` = `m`.`employee_id`
+        JOIN
+    `departments` AS `d` ON `e`.`department_id` = `d`.`department_id`
+ORDER BY `e`.`employee_id`
+LIMIT 5;
+
+-- 11 Min Average Salary
+SELECT 
+    AVG(`salary`) AS 'min_average_salary'
+FROM
+    `employees`
+GROUP BY `department_id`
+ORDER BY `min_average_salary`
+LIMIT 1;
 
