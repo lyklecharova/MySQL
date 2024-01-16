@@ -210,3 +210,55 @@ WHERE
     `c`.`continent_code` = 'AF'
 ORDER BY `c`.`country_name` ASC
 LIMIT 5;
+
+
+-- 15 *Continents and Currencies
+SELECT 
+    `c`.`continent_code`,
+    `currency_code`,
+    COUNT(*) AS 'currency_usage'
+FROM
+    `countries` AS `c`
+GROUP BY `c`.`continent_code` , `c`.`currency_code`
+HAVING `currency_usage` > 1
+    AND `currency_usage` = (SELECT 
+        COUNT(*) AS `count_of_currencies`
+    FROM
+        `countries` AS `c2`
+    WHERE
+        `c2`.`continent_code` = `c`.`continent_code`
+    GROUP BY `c2`.`currency_code`
+    ORDER BY `count_of_currencies` DESC
+    LIMIT 1)
+ORDER BY `c`.`continent_code` , `c`.`currency_code`;
+
+-- 16 Countries Without Any Mountains
+SELECT 
+    COUNT(*) AS 'country_count'
+FROM
+    `countries` AS `c`
+        LEFT JOIN
+    `mountains_countries` AS `mc` ON `c`.`country_code` = `mc`.`country_code`
+WHERE
+    `mc`.`mountain_id` IS NULL;
+
+-- 17 Highest Peak and Longest River by Country
+SELECT 
+    `c`.`country_name`,
+    MAX(`p`.`elevation`) AS 'highest_peak_elevation',
+    MAX(`r`.`length`) AS 'longest_river_length'
+FROM
+    `countries` AS `c`
+        LEFT JOIN
+    `mountains_countries` AS `mc` ON `c`.`country_code` = `mc`.`country_code`
+        LEFT JOIN
+    `mountains` AS `m` ON `mc`.`mountain_id` = `m`.`id`
+        LEFT JOIN
+    `peaks` AS `p` ON `m`.`id` = `p`.`mountain_id`
+        LEFT JOIN
+    `countries_rivers` AS `cr` ON `c`.`country_code` = `cr`.`country_code`
+        LEFT JOIN
+    `rivers` AS `r` ON `r`.`id` = `cr`.`river_id`
+GROUP BY `c`.`country_name`
+ORDER BY `highest_peak_elevation` DESC , `longest_river_length` DESC , `c`.`country_name` ASC
+LIMIT 5;
