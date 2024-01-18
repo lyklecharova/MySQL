@@ -42,3 +42,52 @@ ORDER BY `e`.`first_name`,
     `e`.`last_name`,
     `e`.`employee_id`;
 END $$ DELIMITER;
+
+-- 5 Salary Level Function
+DELIMITER $$
+CREATE FUNCTION `ufn_get_salary_level`(`salary` DECIMAL(19,4))
+RETURNS VARCHAR(7)
+DETERMINISTIC
+BEGIN
+    IF (`salary` < 30000) THEN
+        RETURN 'Low';
+    ELSEIF (`salary` >= 30000 AND `salary` <= 50000) THEN
+        RETURN 'Average';
+    ELSE
+        RETURN 'High';
+    END IF;
+END $$
+DELIMITER ;
+
+-- 6 Employees by Salary Level
+DELIMITER $$
+CREATE PROCEDURE `usp_get_employees_by_salary_level`(`salary_level` VARCHAR(7))
+BEGIN
+    SELECT `first_name`, `last_name`
+    FROM `employees`
+    WHERE (`salary` < 30000 AND `salary_level` = 'Low')
+       OR (`salary` >= 30000 AND `salary` <= 50000 AND `salary_level` = 'Average')
+       OR (`salary` > 50000 AND `salary_level` = 'High')
+    ORDER BY `first_name` DESC, `last_name` DESC;
+END $$
+DELIMITER ;
+
+-- 7 Define Function
+DELIMITER $$
+CREATE FUNCTION `ufn_is_word_comprised`(`set_of_letters` VARCHAR(50), `word` VARCHAR(50))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+     RETURN `word` REGEXP (CONCAT('^[', `set_of_letters`, ']+$'));
+END $$
+DELIMITER ;
+
+-- 8 Find Full Name
+DELIMITER $$
+CREATE PROCEDURE `usp_get_holders_full_name`()
+BEGIN
+    SELECT CONCAT(`first_name`, ' ', `last_name`) AS 'full_name'
+    FROM `account_holders`
+    ORDER BY `full_name`, `id`;
+END $$
+DELIMITER ;
