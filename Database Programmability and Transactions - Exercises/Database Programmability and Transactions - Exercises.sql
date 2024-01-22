@@ -145,3 +145,125 @@ END $$
 DELIMITER ;
 CALL `usp_calculate_future_value_for_account`(1, 0.1);
 
+-- 12 Deposit Money
+DELIMITER $$
+CREATE PROCEDURE `usp_deposit_money`(`account_id` INT, `money_amount` DECIMAL(19, 4))
+BEGIN
+    START TRANSACTION;
+    IF (`money_amount` <= 0) THEN
+        ROLLBACK ;
+    ELSE
+        UPDATE `accounts` AS `a`
+        SET `a`.`balance`= `a`.`balance` + `money_amount`
+        WHERE `a`.`id` = `account_id`;
+    END IF;
+END $$
+DELIMITER ;
+
+-- 13. Withdraw Money
+DELIMITER $$
+CREATE PROCEDURE `usp_withdraw_money`(`account_id` INT, `money_amount` DECIMAL(19, 4))
+BEGIN
+
+    IF (`money_amount` > 0) THEN
+        START TRANSACTION;
+
+        UPDATE `accounts` AS `a`
+        SET `a`.`balance`=`a`.`balance` - `money_amount`
+        WHERE `a`.`id` = `account_id`;
+
+        IF (SELECT `balance` FROM `accounts` WHERE `id` = `account_id`) < 0
+        THEN
+            ROLLBACK ;
+        ELSE
+            COMMIT ;
+        END IF;
+    END IF;
+
+END $$
+DELIMITER ;
+
+-- 14. Money Transfer
+DELIMITER $$
+CREATE PROCEDURE usp_transfer_money(
+    from_account_id INT, to_account_id INT, money_amount DECIMAL(19, 4))
+BEGIN
+    IF money_amount > 0 
+        AND from_account_id != to_account_id 
+        AND (SELECT a.id 
+            FROM `accounts` AS a 
+            WHERE a.id = to_account_id) IS NOT NULL
+        AND (SELECT a.id 
+            FROM `accounts` AS a 
+            WHERE a.id = from_account_id) IS NOT NULL
+        AND (SELECT a.balance 
+            FROM `accounts` AS a 
+            WHERE a.id = from_account_id) >= money_amount
+    THEN
+        START TRANSACTION;
+        
+        UPDATE `accounts` AS a 
+        SET 
+            a.balance = a.balance + money_amount
+        WHERE
+            a.id = to_account_id;
+            
+        UPDATE `accounts` AS a 
+        SET 
+            a.balance = a.balance - money_amount
+        WHERE
+            a.id = from_account_id;
+        
+        IF (SELECT a.balance 
+            FROM `accounts` AS a 
+            WHERE a.id = from_account_id) < 0
+            THEN ROLLBACK;
+        ELSE
+            COMMIT;
+        END IF;
+    END IF;
+END $$
+DELIMITER ;
+
+CALL `usp_transfer_money`(1, 2, -10);
+
+-- 15. Log Accounts Trigger
+CREATE TABLE `logs`(
+    `log_id`     INT PRIMARY KEY AUTO_INCREMENT,
+    `account_id` INT            NOT NULL,
+    `old_sum`    DECIMAL(19, 4) NOT NULL,
+    `new_sum`    DECIMAL(19, 4) NOT NULL
+);
+
+
+CREATE TRIGGER `trigger_balance_update`
+    AFTER UPDATE
+    ON `accounts`
+    FOR EACH ROW
+BEGIN
+    IF `OLD`.`balance` != `new`.`balance`
+    THEN
+        INSERT INTO `logs` (`account_id`, `old_sum`, `new_sum`)
+            VALUE (`OLD`.`id`, `OLD`.`balance`, `new`.`balance`);
+    END IF;
+END;
+
+-- 16. Emails Trigger
+CREATE TABLE `notification_emails`(
+    `id` INT PRIMARY KEY AUTO_INCREMENT,
+    `recipient` INT NOT NULL,
+    `subject` VARCHAR(100) NOT NULL,
+    `body` TEXT NOT NULL
+);
+
+CREATE TRIGGER `tr_notification_email_creation`
+    AFTER INSERT
+    ON `logs`
+    FOR EACH ROW
+BEGIN
+    INSERT INTO `notification_emails`(`recipient`, `subject`, `body`)
+        VALUE (`new`.`account_id`,
+               CONCAT('Balance change for account: ', `new`.`account_id`),
+               CONCAT('On ', NOW(), ' your balance was changed from ', `NEW`.`old_sum`,' to ', `NEW`.`new_sum`, '.'));
+
+END;
