@@ -90,3 +90,77 @@ WHERE
 	`price` > 1000 
     AND `quantity_in_stock` < 30
 ORDER BY `quantity_in_stock` ASC, `id`;
+
+-- 7 Review
+SELECT
+	`id`,
+    `content`,
+    `rating`,
+    `picture_url`,
+    `published_at`
+FROM `reviews`
+WHERE 
+	`content` LIKE 'My%'
+    AND CHAR_LENGTH(`content`) > 61
+ORDER BY  `rating` DESC;
+
+-- 8 First customers
+SELECT
+	CONCAT_WS(' ', `c`.`first_name`, `c`.`last_name`) AS 'full_name',
+    `c`. `address`,
+    `o`. `order_datetime` AS 'order_date'
+FROM `customers` AS `c`
+JOIN `orders` AS `o` ON `c`.`id` = `o`.`customer_id`
+WHERE 
+	YEAR(`o`. `order_datetime`) <= 2018
+ORDER BY `full_name` DESC;
+
+-- 9 Best categories
+SELECT 
+	COUNT(*) AS 'item_count', 
+    `c`.`name`, 
+    SUM(`quantity_in_stock`) AS 'total_quantity'
+FROM `products` AS `p`
+JOIN `categories` AS `c` ON `p`.`category_id` = `c`.`id`
+GROUP BY `c`.`name`
+ORDER BY `item_count` DESC, `total_quantity` ASC
+LIMIT 5;
+
+-- 10 Extract client cards count
+DELIMITER $$
+CREATE FUNCTION `udf_customer_products_count` (`name` VARCHAR(30))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+	RETURN(
+		SELECT
+		COUNT(*)
+		FROM `customers` AS `c`
+		JOIN `orders` AS `o` ON `c`.`id` = `o`.`customer_id`
+		JOIN `orders_products` AS `op` ON `o`.`id` = `op`.`order_id`
+		WHERE `c`. `first_name` = `name`
+    );
+END $$
+DELIMITER ;
+SELECT 
+    `c`.`first_name`,
+    `c`.`last_name`, 
+    `udf_customer_products_count`('Shirley') AS 'total_products' 
+FROM `customers` AS `c`
+WHERE 
+    `c`.`first_name` = 'Shirley';
+
+-- 11 Reduce price
+DELIMITER $$
+CREATE PROCEDURE `udp_reduce_price`(`category_name` VARCHAR(50))
+BEGIN
+	UPDATE
+    `products` AS `p`
+    JOIN `categories` AS `c` ON `p`.`category_id` = `c`.`id`
+    JOIN `reviews` AS `r` ON `p`.`review_id` = `r`.`id`
+    SET `p`.`price` = `p`.`price` * 0.7
+    WHERE `c`.`name` = `category_name`
+    AND `r`.`rating` <4;
+END $$
+DELIMITER ; 
+CALL `udp_reduce_price`('Phones and tablets');
