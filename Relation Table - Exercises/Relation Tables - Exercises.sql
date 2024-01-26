@@ -135,34 +135,56 @@ CREATE TABLE `order_items`(
 -- 6 University Database
 CREATE DATABASE `university_database`;
 use `university_database`;
-CREATE TABLE `subjects` (
-    `subject_id` INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+CREATE TABLE `subjects`
+(
+    `subject_id`   INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `subject_name` VARCHAR(50)
 );
-CREATE TABLE `majors` (
-    `major_id` INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    `name` VARCHAR(50)
+
+CREATE TABLE `majors`
+(
+    `major_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `name`     VARCHAR(50)
 );
-CREATE TABLE `students` (
-    `student_id` INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+
+CREATE TABLE `students`
+(
+    `student_id`     INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `student_number` VARCHAR(12),
-    `student_name` VARCHAR(50),
-    `major_id` INT,
-    CONSTRAINT `fk_students_majors` FOREIGN KEY (`major_id`) REFERENCES `majors` (`major_id`)
+    `student_name`   VARCHAR(50),
+    `major_id`       INT,
+    CONSTRAINT `fk_student_majors`
+        FOREIGN KEY (`major_id`)
+            REFERENCES `majors` (`major_id`)
 );
-CREATE TABLE `payment` (
-    `payment_id` INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    `payment_date` DATE,
+
+CREATE TABLE `payments`
+(
+    `payment_id`     INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `payment_date`   DATE,
     `payment_amount` DECIMAL(8, 2),
-    `student_id` INT,
-    CONSTRAINT `fk_payment_students` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`)
+    `student_id`     INT,
+    CONSTRAINT `fk_payments_students`
+        FOREIGN KEY (`student_id`)
+            REFERENCES `students` (`student_id`)
 );
-CREATE TABLE `agenda` (
+
+
+CREATE TABLE `agenda`
+(
     `student_id` INT,
     `subject_id` INT,
-    CONSTRAINT `pk_students_students_id_subjects_id` PRIMARY KEY (`student_id`, `subject_id`),
-    CONSTRAINT `fk_students_id_subjects_id` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`),
-    CONSTRAINT `fk_subjects_id_student)_id` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`subject_id`)
+    CONSTRAINT `pk_students_id__subjects_id`
+        PRIMARY KEY
+            (`student_id`, `subject_id`),
+    CONSTRAINT `fk_students_id__subjects_id`
+        FOREIGN KEY (`student_id`)
+            REFERENCES `students` (`student_id`),
+
+    CONSTRAINT `fk_subject_id__student_id`
+        FOREIGN KEY (`subject_id`)
+            REFERENCES `subjects` (`subject_id`)
+
 );
 -- 9. Peaks in Rila
 use `geography`;
