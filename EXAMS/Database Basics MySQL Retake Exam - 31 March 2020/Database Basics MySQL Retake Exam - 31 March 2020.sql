@@ -107,4 +107,74 @@ SELECT
     `age`
 FROM `users`
 ORDER BY  `age` DESC , `username` ASC ;
+
+-- 6 Extract 5 Most Commented Photos
+SELECT 
+	`p`.`id`,
+    `p`. `date` AS 'date_and_time',
+    `p`. `description`,
+    COUNT(`c`.`photo_id`) AS 'commentsCount'
+FROM `photos` AS `p`
+	JOIN `comments` AS `c` ON `p`.`id` = `c`.`photo_id`
+GROUP BY `p`.`id`
+ORDER BY `commentsCount` DESC, `p`.`id` ASC
+LIMIT 5;
+
+-- 7 Lucky Users
+SELECT
+	CONCAT(`u`.`id`, ' ', `u`.`username`) AS 'id_username',
+    `u`.`email`
+FROM `users` AS `u`
+	JOIN `users_photos` AS `up` ON `u`.`id` = `up`.`user_id`
+WHERE `photo_id` = `user_id`
+ORDER BY `id` ASC;
+
+-- 8 Count Likes and Comments
+SELECT
+	`p`.`id` AS 'photo_id',
+    COUNT(DISTINCT `l`.`id`) AS 'likes_count',
+    COUNT(DISTINCT `c`.`id`) AS 'comments_count'
+FROM `photos` AS `p`
+	LEFT JOIN `comments` AS `c` ON `p`.`id` = `c`.`photo_id`
+    LEFT JOIN `likes` AS `l` ON `p`.`id` = `l`.`photo_id`
+GROUP BY `p`.`id`
+ORDER BY `likes_count` DESC, `comments_count` DESC, `p`.`id`;
+
+-- 9 The Photo on the Tenth Day of the Month
+SELECT
+	CONCAT(SUBSTRING(`description`, 1,30), '...') AS 'summary',
+    `date`
+FROM `photos`
+WHERE DAY(`date`) = 10
+ORDER BY `date` DESC;
+
+-- 10 Get User's Photos Count
+DELIMITER $$
+CREATE FUNCTION `udf_users_photos_count`(`username` VARCHAR(30))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+	RETURN(
+		SELECT
+        COUNT(`up`.`photo_id`)
+        FROM `users` AS `u`
+			JOIN `users_photos` AS `up` ON `u`.`id` = `up`.`user_id`
+		WHERE `u`.`username` = `username`
+    );
+END $$
+DELIMITER ;
+
+
+-- 11 Increase User Age
+DELIMITER $$
+CREATE PROCEDURE `udp_modify_user` (`address` VARCHAR(30), `town` VARCHAR(30))
+BEGIN
+	UPDATE `users` AS `u`
+		JOIN `addresses` AS `a` ON `u`.`id` = `a`.`user_id`
+	SET `age` = `age` + 10
+    WHERE 
+		`a`.`address` = `address` 
+        AND `a`.`town` = `town`;
+END $$
+DELIMITER ;
 	
