@@ -135,3 +135,69 @@ WHERE
     AND `hire_date` IS NULL
     AND `sd`.`strength` > 50
 ORDER BY `salary` ASC, `age`;
+
+-- 07. Detail info for all teams
+SELECT `t`.`name`      AS `team_name`,
+       `t`.`established`,
+       `t`.`fan_base`,
+       COUNT(`p`.`id`) AS 'players_count'
+FROM `teams` AS `t`
+         LEFT JOIN `players` AS `p` ON `t`.`id` = `p`.`team_id`
+GROUP BY `t`.`name`, `t`.`established`, `t`.`fan_base`
+ORDER BY `players_count` DESC, `fan_base` DESC;
+
+-- 9 Total salaries and players by country
+SELECT
+	`c`.`name`,
+    COUNT(`p`.`id`) AS 'total_count_of_players',
+    SUM(DISTINCT `p`.`salary`) AS 'total_sum_of_salaries'
+FROM `players` AS `p`
+	RIGHT JOIN `skills_data` AS `sd` ON `p`.`skills_data_id` = `sd`.`id`
+    RIGHT JOIN `teams` AS `t` ON `p`.`team_id` = `t`.`id`
+    RIGHT JOIN `stadiums` AS `s` ON `t`.`stadium_id` = `s`.`id`
+     RIGHT JOIN `towns` AS `ts` ON `s`.`town_id` = `ts`.`id`
+	RIGHT JOIN `countries` AS `c` ON `ts`.`country_id` = `c`.`id`
+GROUP BY `c`.`name`
+ORDER BY `total_count_of_players` DESC, `c`.`name`;
+
+-- 10 Find all players that play in the stadium
+DELIMITER $$
+CREATE FUNCTION `udf_stadium_players_count` (`stadium_name` VARCHAR(30))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+	RETURN(
+		SELECT
+			COUNT(`p`.`id`)
+		FROM `players` AS `p`
+			RIGHT JOIN `teams` AS `t` ON `p`.`team_id` = `t`.`id`
+            RIGHT JOIN `stadiums` AS `s` ON `t`.`stadium_id` = `s`.`id`
+            RIGHT JOIN `towns` AS `ts` ON `s`.`town_id` = `ts`.`id`
+		WHERE `s`.`name` LIKE `stadium_name`
+    );
+END $$
+DELIMITER ;
+
+-- 11 Find good playmakers by teams
+DELIMITER $$
+CREATE PROCEDURE `udp_find_playmaker`(`min_dribble_points` INT, `team_name` VARCHAR(45))
+BEGIN
+
+    SELECT CONCAT(`p`.`first_name`, ' ', `p`.`last_name`) AS 'full_name',
+           `age`,
+           `salary`,
+           `sd`.`dribbling`,
+           `sd`.`speed`,
+           `t`.`name`
+    FROM `players` AS `p`
+             JOIN `skills_data` AS `sd` ON `p`.`skills_data_id` = `sd`.`id`
+             JOIN `teams` AS `t` ON `p`.`team_id` = `t`.`id`
+    WHERE `sd`.`dribbling` > `min_dribble_points`
+      AND `t`.`name` LIKE `team_name`
+      AND `speed` > (SELECT AVG(`speed`)
+                     FROM `skills_data`)
+    ORDER BY `sd`.`speed` DESC
+    LIMIT 1;
+
+END $$
+DELIMITER ;
