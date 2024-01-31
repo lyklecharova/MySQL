@@ -90,3 +90,48 @@ CREATE TABLE `players_coaches` (
 		FOREIGN KEY(`coach_id`)
 			REFERENCES `coaches`(`id`)
 );
+
+-- 2 Insert
+INSERT INTO `coaches`(`first_name`, `last_name`, `salary`, `coach_level`)
+SELECT
+	`first_name`,
+    `last_name`,
+    `salary` * 2,
+    CHAR_LENGTH(`first_name`)
+FROM `players`
+WHERE `age` >= 45;
+
+-- 3 Update
+UPDATE `coaches` AS `c`
+	JOIN `players_coaches` AS `pc` ON `c`.`id` = `pc`.`coach_id`
+SET `c`.`coach_level` = `c`.`coach_level` + 1
+WHERE `c`.`first_name` LIKE 'A%';
+
+-- 4 Delete
+DELETE
+FROM `players`
+WHERE `age` >= 45;
+
+-- 5 Players
+SELECT
+	`first_name`,
+    `age`,
+    `salary`
+FROM `players`
+ORDER BY  `salary` DESC;
+
+-- 6 Young offense players without a contract
+SELECT
+	`p`.`id`,
+    CONCAT(`p`.`first_name`, ' ', `p`.`last_name`) AS 'full_name',
+     `age`,
+	`position`,
+	`hire_date`
+FROM `players` AS `p`
+	JOIN `skills_data` AS `sd` ON `p`.`skills_data_id` = `sd`.`id`
+WHERE 
+	`age` < 23
+    AND `position` LIKE 'A'
+    AND `hire_date` IS NULL
+    AND `sd`.`strength` > 50
+ORDER BY `salary` ASC, `age`;
