@@ -81,25 +81,6 @@ CREATE TABLE `genres_movies` (
 );
 
 -- 2 Insert
-SELECT 
-    REVERSE(`first_name`),
-    REVERSE(`last_name`),
-    DATE_ADD(`birthdate`, INTERVAL - 2 DAY),
-    `height` - 10,
-    `country_id`,
-    (SELECT 
-            `id`
-        FROM
-            `countries`
-        WHERE
-            `name` = 'Armenia')
-FROM
-    `actors` AS `a`
-        JOIN
-    `countries` AS `c` ON `a`.`country_id` = `c`.`id`
-WHERE
-    `a`.`id` <= 10;
-
 INSERT INTO `actors` (`first_name`, `last_name`, `birthdate`, `height`, `awards`, `country_id`)
     (SELECT REVERSE(`first_name`),
             REVERSE(`last_name`),
