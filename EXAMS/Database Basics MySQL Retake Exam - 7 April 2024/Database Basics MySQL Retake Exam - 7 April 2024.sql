@@ -75,3 +75,31 @@ CREATE TABLE `instructors_students`(
     FOREIGN KEY (`student_id`) 
     REFERENCES `students`(`id`)
 );
+
+-- 02 Insert
+INSERT INTO `students`(
+        `first_name`,
+        `last_name`,
+        `age`,
+        `phone_number`
+    )
+SELECT LOWER(REVERSE(`first_name`)),
+    LOWER(REVERSE(`last_name`)),
+    `age` + CAST(SUBSTRING(`phone_number`, 1, 1) AS UNSIGNED),
+    CONCAT('1+', `phone_number`)
+FROM `students`
+WHERE `age` < 20;
+
+-- 03 Update
+UPDATE `driving_schools`
+SET `average_lesson_price` = `average_lesson_price` + 30
+WHERE `city_id` = (
+        SELECT `id`
+        FROM `cities`
+        WHERE `name` = 'London'
+    )
+    AND `night_time_driving` = 1;
+
+-- 04 Delete
+DELETE FROM `driving_schools`
+WHERE `night_time_driving` = 0;
