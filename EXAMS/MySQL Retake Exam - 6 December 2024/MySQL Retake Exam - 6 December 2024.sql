@@ -82,3 +82,76 @@ DELETE FROM `restaurants`
 WHERE
     `name` LIKE '%fast%'
     OR `type` LIKE '%fast%';
+
+-- 05 Get all offerings from restaurant
+SELECT
+    `o`.`name`,
+    `o`.`price`
+FROM
+    `offerings` AS `o`
+    JOIN `restaurants` AS `r` ON `o`.`restaurant_id` = `r`.`id`
+WHERE
+    `r`.`name` = "Burger Haven"
+ORDER BY
+    `o`.`id` ASC;
+
+-- 06 Get all customers without orders
+SELECT
+    `c`.`id`,
+    `c`.`first_name`,
+    `c`.`last_name`
+FROM
+    `customers` AS `c`
+    LEFT JOIN `orders` AS `o` ON `c`.`id` = `o`.`customer_id`
+WHERE
+    `o`.`id` IS NULL
+ORDER BY
+    `c`.`id` ASC;
+
+-- 07 Get all offerings from orders of the customer
+SELECT
+    `o`.`id`,
+    `o`.`name`
+FROM
+    `offerings` AS `o`
+    JOIN `orders_offerings` AS `oof` ON `o`.`id` = `oof`.`offering_id`
+    JOIN `orders` AS `orders` ON `oof`.`order_id` = `orders`.`id`
+    JOIN `customers` AS `c` ON `orders`.`customer_id` = `c`.`id`
+WHERE
+    `c`.`first_name` = "Sofia"
+    AND `c`.`last_name` = "Sanchez"
+    AND `o`.`vegan` = 0
+ORDER BY
+    `o`.`id` ASC;
+
+-- 08 Get all restaurants with regular customers
+SELECT DISTINCT
+    `r`.`id`,
+    `r`.`name`
+FROM
+    `restaurants` AS `r`
+    JOIN `offerings` AS `of` ON `r`.`id` = `of`.`restaurant_id`
+    JOIN `orders_offerings` AS `oof` ON `of`.`id` = `oof`.`offering_id`
+    JOIN `orders` AS `o` ON `oof`.`order_id` = `o`.`id`
+    JOIN `customers` AS `c` ON `o`.`customer_id` = `c`.`id`
+WHERE
+    `c`.`regular` = 1
+    AND `of`.`vegan` = 1
+    AND `o`.`priority` = 'high'
+ORDER BY
+    r.id ASC;
+
+-- 09 Offering price categories
+SELECT
+    `name` AS `offering_name`,
+    CASE
+        WHEN `price` <= 10 THEN 'cheap'
+        WHEN `price` > 10
+        AND `price` <= 25 THEN 'affordable'
+        WHEN `price` > 25 THEN 'expensive'
+    END AS `price_category`
+FROM
+    `offerings`
+ORDER BY
+    `price` DESC,
+    `name` ASC;
