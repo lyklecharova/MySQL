@@ -56,3 +56,29 @@ CREATE TABLE
         CONSTRAINT `fk_orders_offerings_restaurants` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`),
         CONSTRAINT `pk_orders_offerings` PRIMARY KEY (`order_id`, `offering_id`)
     );
+
+-- 02 Insert
+INSERT INTO
+    `offerings` (`name`, `price`, `vegan`, `restaurant_id`)
+SELECT
+    CONCAT (`name`, " costs:"),
+    `price`,
+    `vegan`,
+    `restaurant_id`
+FROM
+    `offerings`
+WHERE
+    name LIKE "Grill%";
+
+-- 03 Update
+UPDATE `offerings`
+SET
+    `name` = UPPER(`name`)
+WHERE
+    `name` LIKE '%Pizza%';
+
+-- 04 DELETE
+DELETE FROM `restaurants`
+WHERE
+    `name` LIKE '%fast%'
+    OR `type` LIKE '%fast%';
